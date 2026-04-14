@@ -1,1 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Velmed Hospital - Grievance Portal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
+    <div class="background-overlay"></div>
+
+    <div class="container">
+        <header class="main-header">
+            <div class="logo-section">
+                <h2>Velmed Hospitals</h2>
+                <p>Confidential Grievance Registration</p>
+            </div>
+            <div class="status-indicator">● Secure Intake Live</div>
+        </header>
+
+        <main class="content-wrapper">
+            <div class="info-side">
+                <span class="badge">Patient and attendant support desk</span>
+                <h1>Raise your grievance privately for management review.</h1>
+                <p>Your submission is stored securely and visible only on the management monitor for action and facility improvement.</p>
+                
+                <div class="features">
+                    <div class="feature-item"><strong>Private by default</strong><br>Other patients cannot see your entry.</div>
+                    <div class="feature-item"><strong>Management action</strong><br>Direct review by hospital HODs.</div>
+                </div>
+            </div>
+
+            <div class="form-side">
+                <h3>Log a Grievance</h3>
+                <p class="sub-text">Submit a new complaint. It will appear on the monitor immediately.</p>
+                
+                <div class="input-group">
+                    <label>Patient Name</label>
+                    <input type="text" id="patientName" placeholder="Full Name">
+                </div>
+                <div class="input-group">
+                    <label>UHID</label>
+                    <input type="text" id="uhid" placeholder="UHID-123456">
+                </div>
+
+                <div class="input-group">
+                    <label>Department</label>
+                    <select id="department">
+                        <option value="Billing">Billing</option>
+                        <option value="Nursing">Nursing / Ward</option>
+                        <option value="Housekeeping">Housekeeping</option>
+                        <option value="Front Desk">Front Desk / OPD</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>Description</label>
+                    <textarea id="description" placeholder="Please describe the issue in detail..." rows="4"></textarea>
+                </div>
+
+                <button id="submitBtn" onclick="submitGrievance()">Submit Grievance</button>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <script src="script.js"></script>
+</body>
+</html>
