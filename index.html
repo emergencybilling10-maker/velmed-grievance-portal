@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Velmed Hospital - Grievance Portal</title>
+    <title>Velmed Hospital | Grievance Portal</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -13,27 +13,26 @@
     <div class="container">
         <header class="main-header">
             <div class="logo-section">
-                <h2>Velmed Hospitals</h2>
-                <p>Confidential Grievance Registration</p>
+                <h2 style="color: #00668c; margin:0;">VELMED HOSPITALS</h2>
+                <p style="margin:0; font-size: 12px; color: #666;">Indus | Eden Initiative</p>
             </div>
-            <div class="status-indicator">● Secure Intake Live</div>
+            <div class="status-indicator">● Secure Management Link Active</div>
         </header>
 
         <main class="content-wrapper">
             <div class="info-side">
-                <span class="badge">Patient and attendant support desk</span>
-                <h1>Raise your grievance privately for management review.</h1>
-                <p>Your submission is stored securely and visible only on the management monitor for action and facility improvement.</p>
+                <span class="badge">Patient Support Desk</span>
+                <h1>Direct Line to Hospital Management.</h1>
+                <p>Your feedback helps us maintain Velmed's standard of care. Submissions are encrypted and reviewed by HODs.</p>
                 
                 <div class="features">
-                    <div class="feature-item"><strong>Private by default</strong><br>Other patients cannot see your entry.</div>
-                    <div class="feature-item"><strong>Management action</strong><br>Direct review by hospital HODs.</div>
+                    <div class="feature-item"><strong>● Real-time Monitoring</strong><br>Bed managers see your request instantly.</div>
+                    <div class="feature-item"><strong>● Private Tracking</strong><br>Use your UHID to check resolution progress.</div>
                 </div>
             </div>
 
             <div class="form-side">
-                <h3>Log a Grievance</h3>
-                <p class="sub-text">Submit a new complaint. It will appear on the monitor immediately.</p>
+                <h3>Register Grievance</h3>
                 
                 <div class="input-group">
                     <label>Patient Name</label>
@@ -41,31 +40,31 @@
                 </div>
                 <div class="input-group">
                     <label>UHID</label>
-                    <input type="text" id="uhid" placeholder="UHID-123456">
+                    <input type="text" id="uhid" placeholder="UHID Number">
                 </div>
 
                 <div class="input-group">
                     <label>Department</label>
                     <select id="department">
-                        <option value="Billing">Billing</option>
+                        <option value="Billing">Billing / Cashier</option>
                         <option value="Nursing">Nursing / Ward</option>
-                        <option value="Housekeeping">Housekeeping</option>
+                        <option value="Housekeeping">Housekeeping / IPD</option>
                         <option value="Front Desk">Front Desk / OPD</option>
                     </select>
                 </div>
 
                 <div class="input-group">
-                    <label>Grievance Category</label>
+                    <label>Category</label>
                     <select id="category">
-                        <option value="Staff Behavior">Staff Behavior</option>
-                        <option value="Facility/Cleanliness">Facility/Cleanliness</option>
-                        <option value="Delay in Service">Delay in Service</option>
-                        <option value="Other">Other</option>
+                        <option value="Delay">Delay in Service</option>
+                        <option value="Behavior">Staff Behavior</option>
+                        <option value="Cleanliness">Cleanliness/Hygiene</option>
+                        <option value="Medical">Clinical Quality</option>
                     </select>
                 </div>
 
                 <div class="input-group">
-                    <label>Review rating for facility improvement</label>
+                    <label>Facility Rating</label>
                     <select id="rating">
                         <option value="5">⭐⭐⭐⭐⭐ (Excellent)</option>
                         <option value="4">⭐⭐⭐⭐ (Good)</option>
@@ -76,128 +75,42 @@
                 </div>
 
                 <div class="input-group">
-                    <label>Description</label>
-                    <textarea id="description" placeholder="Please describe the issue in detail..." rows="4"></textarea>
+                    <label>Detail Description</label>
+                    <textarea id="description" placeholder="Describe your concern..." rows="3"></textarea>
                 </div>
 
-                <button id="submitBtn" onclick="submitGrievance()">Submit Grievance</button>
+                <button id="submitBtn" onclick="submitGrievance()">Submit to Management</button>
 
-                <div class="status-check-card" style="margin-top: 25px; border-top: 1px solid #ddd; padding-top: 20px;">
-                    <h4 style="margin-top:0; color:#00668c;">Check Complaint Status</h4>
-                    <div style="display: flex; gap: 10px;">
+                <div class="status-check-card" style="margin-top: 25px; border-top: 2px dashed #eee; padding-top: 20px;">
+                    <h4 style="margin: 0 0 10px 0; color: #00668c;">Track My Grievance</h4>
+                    <div style="display: flex; gap: 8px;">
                         <input type="text" id="checkUHID" placeholder="Enter UHID">
-                        <button onclick="checkStatus()" style="width: auto; padding: 10px 15px; margin: 0; background:#27ae60; color: white; border: none; border-radius: 4px; cursor: pointer;">Check</button>
+                        <button onclick="checkStatus()" style="width: auto; padding: 10px 15px; margin:0; background: #27ae60;">Check</button>
                     </div>
-                    <p id="statusResult" style="margin-top: 10px; font-size: 14px; font-weight: bold; color: #00668c; min-height: 20px;"></p>
+                    <div id="statusResult"></div>
                 </div>
             </div>
         </main>
     </div>
 
+    <div id="chat-circle" onclick="toggleChat()" style="position: fixed; bottom: 25px; right: 25px; background: #00668c; width: 55px; height: 55px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 1000; font-size: 24px;">💬</div>
+    
+    <div id="chat-box" style="display: none; position: fixed; bottom: 90px; right: 25px; width: 300px; height: 400px; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); flex-direction: column; z-index: 1000; overflow: hidden; border: 1px solid #ddd;">
+        <div style="background: #00668c; color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between;">
+            <span>Velmed Assistant</span>
+            <span onclick="toggleChat()" style="cursor:pointer">×</span>
+        </div>
+        <div id="chat-content" style="flex: 1; padding: 15px; overflow-y: auto; background: #f9f9f9; font-size: 13px;">
+            <p><strong>AI:</strong> Welcome to Velmed Hospitals. How can I assist you today?</p>
+        </div>
+        <div style="padding: 10px; border-top: 1px solid #eee; display: flex;">
+            <input type="text" id="chatInput" placeholder="Ask about OPD, Billing..." style="flex: 1; border: 1px solid #ddd; padding: 8px; border-radius: 5px; outline: none;">
+            <button onclick="sendChat()" style="width: auto; margin: 0 0 0 5px; padding: 5px 10px;">Send</button>
+        </div>
+    </div>
+
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    
-    <script>
-        // 1. Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyDikrV0xVMX6ZGA4_qZWlN_Dr_nR_PnWWk",
-            authDomain: "velmed-hospital-feedback.firebaseapp.com",
-            projectId: "velmed-hospital-feedback",
-            storageBucket: "velmed-hospital-feedback.firebasestorage.app",
-            messagingSenderId: "271213008018",
-            appId: "1:271213008018:web:f3e5136d18b8a64a02c24b"
-        };
-
-        // 2. Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
-        // 3. Function to Submit a New Grievance
-        function submitGrievance() {
-            const submitBtn = document.getElementById('submitBtn');
-            const name = document.getElementById('patientName').value;
-            const uhid = document.getElementById('uhid').value;
-            const dept = document.getElementById('department').value;
-            const cat = document.getElementById('category').value;
-            const rating = document.getElementById('rating').value; 
-            const desc = document.getElementById('description').value;
-
-            if (!name || !desc || !uhid) {
-                alert("Please fill in the Patient Name, UHID, and Description.");
-                return;
-            }
-
-            submitBtn.disabled = true;
-            submitBtn.innerText = "Submitting...";
-
-            db.collection("grievances").add({
-                patientName: name,
-                uhid: uhid,
-                department: dept,
-                category: cat,
-                rating: rating,
-                description: desc,
-                status: "Pending",
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            })
-            .then(() => {
-                alert("Grievance submitted successfully to Management.");
-                // Reset form fields
-                document.getElementById('patientName').value = "";
-                document.getElementById('uhid').value = "";
-                document.getElementById('description').value = "";
-                document.getElementById('rating').value = "5"; 
-                submitBtn.disabled = false;
-                submitBtn.innerText = "Submit Grievance";
-            })
-            .catch((error) => {
-                console.error("Error adding document: ", error);
-                alert("Error submitting. Please check your internet connection.");
-                submitBtn.disabled = false;
-                submitBtn.innerText = "Submit Grievance";
-            });
-        }
-
-        // 4. Function to Check Grievance Status
-        function checkStatus() {
-            const searchUHID = document.getElementById('checkUHID').value;
-            const resultDisplay = document.getElementById('statusResult');
-
-            if (!searchUHID) {
-                alert("Please enter a UHID to search.");
-                return;
-            }
-
-            resultDisplay.innerText = "Searching database...";
-
-            db.collection("grievances")
-              .where("uhid", "==", searchUHID)
-              .orderBy("timestamp", "desc") 
-              .limit(1)
-              .get()
-              .then((querySnapshot) => {
-                  if (!querySnapshot.empty) {
-                      let latestDoc = querySnapshot.docs[0].data();
-                      
-                      let statusColor = "#e67e22"; // Default: Orange (Pending)
-                      if(latestDoc.status === "Resolved") statusColor = "#27ae60"; // Green
-                      if(latestDoc.status === "Under Review") statusColor = "#2980b9"; // Blue
-
-                      resultDisplay.innerHTML = `
-                        <div style="margin-top:15px; background: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 5px solid ${statusColor}; font-family: sans-serif; text-align: left;">
-                            <strong style="display:block; margin-bottom:5px;">Current Status: <span style="color:${statusColor};">${latestDoc.status}</span></strong>
-                            <small style="color: #666;">Department: ${latestDoc.department}</small><br>
-                            <small style="color: #666;">Submitted on: ${latestDoc.timestamp ? latestDoc.timestamp.toDate().toLocaleDateString() : 'Just now'}</small>
-                        </div>`;
-                  } else {
-                      resultDisplay.innerHTML = "<div style='color:red; margin-top:15px;'>No record found for this UHID.</div>";
-                  }
-              })
-              .catch((error) => {
-                  console.error("Error fetching status:", error);
-                  resultDisplay.innerText = "Error retrieving data. Check console for index requirements.";
-              });
-        }
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
