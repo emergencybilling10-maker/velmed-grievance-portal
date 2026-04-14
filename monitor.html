@@ -3,48 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Management Operations Monitor | Velmed</title>
+    <title>Ops Command Center | Velmed</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        .admin-container { max-width: 1300px; margin: 20px auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { background: #00668c; color: white; padding: 12px; text-align: left; }
-        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
-        .status-badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; }
-        .pending { background: #fff3cd; color: #856404; }
-        .rating-stars { color: #f39c12; font-weight: bold; }
-        .refresh-btn { background: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; float: right; }
+        .admin-container { max-width: 1300px; margin: 20px auto; background: #f4f7f6; padding: 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .dashboard-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #00668c; padding-bottom: 15px; margin-bottom: 20px; }
         
-        /* Admin Delete Button Styling */
-        .delete-btn { 
-            background: #e74c3c; 
-            color: white; 
-            border: none; 
-            padding: 5px 10px; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            font-size: 12px;
-        }
-        .delete-btn:hover { background: #c0392b; }
+        /* Filter Buttons */
+        .filter-bar { margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+        .filter-btn { padding: 8px 16px; border: none; border-radius: 20px; cursor: pointer; background: #ddd; font-weight: bold; transition: 0.3s; }
+        .filter-btn.active { background: #00668c; color: white; }
+
+        /* Table & SLA Styles */
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; }
+        th { background: #00668c; color: white; padding: 15px; text-align: left; }
+        td { padding: 15px; border-bottom: 1px solid #eee; }
+        
+        .sla-tag { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        .sla-urgent { background: #ff4d4d; color: white; animation: blink 1.5s infinite; }
+        .sla-normal { background: #27ae60; color: white; }
+
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        
+        .delete-btn { background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
     <div class="admin-container">
-        <button class="refresh-btn" onclick="loadGrievances()">🔄 Refresh Data</button>
-        <h2>Hospital Management Operations Monitor</h2>
-        <p>Real-time Patient Grievance Tracking System (Admin Access Required for Deletion)</p>
-        
+        <div class="dashboard-header">
+            <div>
+                <h2 style="margin:0; color:#00668c;">Ops Command Center</h2>
+                <p style="margin:0; font-size:14px;">Real-time Management Monitor</p>
+            </div>
+            <div id="live-indicator" style="color:#27ae60; font-weight:bold;">● LIVE CONNECTION</div>
+        </div>
+
+        <div class="filter-bar" id="filterBar">
+            <button class="filter-btn active" onclick="filterDept('All')">All Departments</button>
+            <button class="filter-btn" onclick="filterDept('Billing')">Billing</button>
+            <button class="filter-btn" onclick="filterDept('Nursing')">Nursing</button>
+            <button class="filter-btn" onclick="filterDept('Housekeeping')">Housekeeping</button>
+        </div>
+
         <table>
             <thead>
                 <tr>
-                    <th>Time</th>
-                    <th>Patient/UHID</th>
-                    <th>Dept</th>
-                    <th>Category</th>
+                    <th>Time / SLA</th>
+                    <th>Patient Details</th>
+                    <th>Dept/Cat</th>
                     <th>Rating</th>
                     <th>Description</th>
-                    <th>Status</th>
-                    <th>Actions</th> </tr>
+                    <th>Actions</th>
+                </tr>
             </thead>
             <tbody id="grievanceTable"></tbody>
         </table>
@@ -55,66 +65,72 @@
 
     <script>
         const firebaseConfig = {
-          apiKey: "AIzaSyDikrV0xVMX6ZGA4_qZWlN_Dr_nR_PnWWk",
-          authDomain: "velmed-hospital-feedback.firebaseapp.com",
-          projectId: "velmed-hospital-feedback",
-          storageBucket: "velmed-hospital-feedback.firebasestorage.app",
-          messagingSenderId: "271213008018",
-          appId: "1:271213008018:web:f3e5136d18b8a64a02c24b"
+            apiKey: "AIzaSyDikrV0xVMX6ZGA4_qZWlN_Dr_nR_PnWWk",
+            authDomain: "velmed-hospital-feedback.firebaseapp.com",
+            projectId: "velmed-hospital-feedback",
+            storageBucket: "velmed-hospital-feedback.firebasestorage.app",
+            messagingSenderId: "271213008018",
+            appId: "1:271213008018:web:f3e5136d18b8a64a02c24b"
         };
-
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // SET YOUR ADMIN PASSWORD HERE
-        const ADMIN_PASSWORD = "your_secret_password"; 
+        let currentFilter = 'All';
 
-        function loadGrievances() {
+        // REAL-TIME LISTENER (Snapshots)
+        db.collection("grievances").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
+            renderTable(snapshot);
+        });
+
+        function renderTable(snapshot) {
             const tableBody = document.getElementById('grievanceTable');
-            tableBody.innerHTML = "<tr><td colspan='8'>Loading...</td></tr>";
+            tableBody.innerHTML = "";
 
-            db.collection("grievances").orderBy("timestamp", "desc").get().then((querySnapshot) => {
-                tableBody.innerHTML = "";
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    const docId = doc.id; // Unique ID from Firebase
-                    const date = data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleString() : "Just now";
-                    
-                    let row = `<tr>
-                        <td>${date}</td>
-                        <td><strong>${data.patientName}</strong><br><small>${data.uhid}</small></td>
-                        <td>${data.department}</td>
-                        <td>${data.category}</td>
-                        <td class="rating-stars">${data.rating} ⭐</td>
-                        <td>${data.description}</td>
-                        <td><span class="status-badge ${data.status.toLowerCase()}">${data.status}</span></td>
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                if (currentFilter !== 'All' && data.department !== currentFilter) return;
+
+                const docId = doc.id;
+                const timeData = data.timestamp ? data.timestamp.toDate() : new Date();
+                const timeString = timeData.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                // SLA Timer Logic (Check if older than 2 hours)
+                const hoursOld = (new Date() - timeData) / (1000 * 60 * 60);
+                const slaClass = hoursOld > 2 ? 'sla-urgent' : 'sla-normal';
+                const slaText = hoursOld > 2 ? 'OVERDUE' : 'ACTIVE';
+
+                tableBody.innerHTML += `
+                    <tr>
                         <td>
-                            <button class="delete-btn" onclick="deleteEntry('${docId}')">🗑 Delete</button>
+                            <strong>${timeString}</strong><br>
+                            <span class="sla-tag ${slaClass}">${slaText}</span>
                         </td>
-                    </tr>`;
-                    tableBody.innerHTML += row;
-                });
+                        <td><strong>${data.patientName}</strong><br><small>UHID: ${data.uhid}</small></td>
+                        <td>${data.department}<br><small>${data.category}</small></td>
+                        <td style="color:#f39c12;">${data.rating} ⭐</td>
+                        <td>${data.description}</td>
+                        <td>
+                            <button class="delete-btn" onclick="deleteEntry('${docId}')">🗑</button>
+                        </td>
+                    </tr>
+                `;
             });
         }
 
-        function deleteEntry(id) {
-            const pass = prompt("Admin Authorization Required: Please enter password to delete this record.");
-            
-            if (pass === ADMIN_PASSWORD) {
-                if (confirm("Are you sure you want to permanently delete this submission?")) {
-                    db.collection("grievances").doc(id).delete().then(() => {
-                        alert("Record deleted successfully.");
-                        loadGrievances(); // Refresh the table
-                    }).catch((error) => {
-                        alert("Error removing record: " + error);
-                    });
-                }
-            } else if (pass !== null) {
-                alert("Incorrect Password. Access Denied.");
-            }
+        function filterDept(dept) {
+            currentFilter = dept;
+            // Visual update for buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            // Trigger refresh
+            db.collection("grievances").orderBy("timestamp", "desc").get().then(renderTable);
         }
 
-        loadGrievances();
+        function deleteEntry(id) {
+            if (confirm("Permanently delete this record?")) {
+                db.collection("grievances").doc(id).delete();
+            }
+        }
     </script>
 </body>
 </html>
