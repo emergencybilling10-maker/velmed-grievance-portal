@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Management Operations Monitor | Velmed</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Specific styles for the Monitor Dashboard */
+        .admin-container { max-width: 1200px; margin: 20px auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background: #00668c; color: white; padding: 12px; text-align: left; }
+        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; }
+        .pending { background: #fff3cd; color: #856404; }
+        .resolved { background: #d4edda; color: #155724; }
+        .rating-stars { color: #f39c12; font-weight: bold; }
+        .refresh-btn { background: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; float: right; }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <button class="refresh-btn" onclick="loadGrievances()">🔄 Refresh Data</button>
+        <h2>Hospital Management Operations Monitor</h2>
+        <p>Real-time Patient Grievance Tracking System</p>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Patient/UHID</th>
+                    <th>Dept</th>
+                    <th>Category</th>
+                    <th>Rating</th>
+                    <th>Grievance Description</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="grievanceTable">
+                </tbody>
+        </table>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Your Firebase Config (Keep this exactly same as your script.js)
+        const firebaseConfig = {
+          apiKey: "AIzaSyDikrV0xVMX6ZGA4_qZWlN_Dr_
