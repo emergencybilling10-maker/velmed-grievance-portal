@@ -86,7 +86,7 @@
                     <h4 style="margin-top:0; color:#00668c;">Check Complaint Status</h4>
                     <div style="display: flex; gap: 10px;">
                         <input type="text" id="checkUHID" placeholder="Enter UHID">
-                        <button onclick="checkStatus()" style="width: auto; padding: 10px 15px; margin: 0; background:#27ae60;">Check</button>
+                        <button onclick="checkStatus()" style="width: auto; padding: 10px 15px; margin: 0; background:#27ae60; color: white; border: none; border-radius: 4px; cursor: pointer;">Check</button>
                     </div>
                     <p id="statusResult" style="margin-top: 10px; font-size: 14px; font-weight: bold; color: #00668c; min-height: 20px;"></p>
                 </div>
@@ -97,6 +97,107 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     
-    <script src="script.js"></script>
+    <script>
+        // 1. Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDikrV0xVMX6ZGA4_qZWlN_Dr_nR_PnWWk",
+            authDomain: "velmed-hospital-feedback.firebaseapp.com",
+            projectId: "velmed-hospital-feedback",
+            storageBucket: "velmed-hospital-feedback.firebasestorage.app",
+            messagingSenderId: "271213008018",
+            appId: "1:271213008018:web:f3e5136d18b8a64a02c24b"
+        };
+
+        // 2. Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // 3. Function to Submit a New Grievance
+        function submitGrievance() {
+            const submitBtn = document.getElementById('submitBtn');
+            const name = document.getElementById('patientName').value;
+            const uhid = document.getElementById('uhid').value;
+            const dept = document.getElementById('department').value;
+            const cat = document.getElementById('category').value;
+            const rating = document.getElementById('rating').value; 
+            const desc = document.getElementById('description').value;
+
+            if (!name || !desc || !uhid) {
+                alert("Please fill in the Patient Name, UHID, and Description.");
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Submitting...";
+
+            db.collection("grievances").add({
+                patientName: name,
+                uhid: uhid,
+                department: dept,
+                category: cat,
+                rating: rating,
+                description: desc,
+                status: "Pending",
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            })
+            .then(() => {
+                alert("Grievance submitted successfully to Management.");
+                // Reset form fields
+                document.getElementById('patientName').value = "";
+                document.getElementById('uhid').value = "";
+                document.getElementById('description').value = "";
+                document.getElementById('rating').value = "5"; 
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Submit Grievance";
+            })
+            .catch((error) => {
+                console.error("Error adding document: ", error);
+                alert("Error submitting. Please check your internet connection.");
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Submit Grievance";
+            });
+        }
+
+        // 4. Function to Check Grievance Status
+        function checkStatus() {
+            const searchUHID = document.getElementById('checkUHID').value;
+            const resultDisplay = document.getElementById('statusResult');
+
+            if (!searchUHID) {
+                alert("Please enter a UHID to search.");
+                return;
+            }
+
+            resultDisplay.innerText = "Searching database...";
+
+            db.collection("grievances")
+              .where("uhid", "==", searchUHID)
+              .orderBy("timestamp", "desc") 
+              .limit(1)
+              .get()
+              .then((querySnapshot) => {
+                  if (!querySnapshot.empty) {
+                      let latestDoc = querySnapshot.docs[0].data();
+                      
+                      let statusColor = "#e67e22"; // Default: Orange (Pending)
+                      if(latestDoc.status === "Resolved") statusColor = "#27ae60"; // Green
+                      if(latestDoc.status === "Under Review") statusColor = "#2980b9"; // Blue
+
+                      resultDisplay.innerHTML = `
+                        <div style="margin-top:15px; background: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 5px solid ${statusColor}; font-family: sans-serif; text-align: left;">
+                            <strong style="display:block; margin-bottom:5px;">Current Status: <span style="color:${statusColor};">${latestDoc.status}</span></strong>
+                            <small style="color: #666;">Department: ${latestDoc.department}</small><br>
+                            <small style="color: #666;">Submitted on: ${latestDoc.timestamp ? latestDoc.timestamp.toDate().toLocaleDateString() : 'Just now'}</small>
+                        </div>`;
+                  } else {
+                      resultDisplay.innerHTML = "<div style='color:red; margin-top:15px;'>No record found for this UHID.</div>";
+                  }
+              })
+              .catch((error) => {
+                  console.error("Error fetching status:", error);
+                  resultDisplay.innerText = "Error retrieving data. Check console for index requirements.";
+              });
+        }
+    </script>
 </body>
 </html>
