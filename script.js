@@ -1,4 +1,4 @@
-// 1. Firebase Configuration (Your specific credentials)
+// 1. Firebase Configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDikrV0xVMX6ZGA4_qZWlN_Dr_nR_PnWWk",
   authDomain: "velmed-hospital-feedback.firebaseapp.com",
@@ -12,7 +12,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// 3. Function to Submit a New Grievance
+// 3. Submit Grievance Logic
 function submitGrievance() {
     const name = document.getElementById('patientName').value;
     const uhid = document.getElementById('uhid').value;
@@ -33,12 +33,12 @@ function submitGrievance() {
         category: cat,
         rating: rating,
         description: desc,
-        status: "Pending", // Default status
+        status: "Pending",
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     })
     .then(() => {
         alert("Grievance submitted successfully to Management.");
-        // Clear form fields
+        // Clear fields
         document.getElementById('patientName').value = "";
         document.getElementById('uhid').value = "";
         document.getElementById('description').value = "";
@@ -46,11 +46,11 @@ function submitGrievance() {
     })
     .catch((error) => {
         console.error("Submission Error:", error);
-        alert("Error submitting. Please check your internet or disable AdBlockers.");
+        alert("Error submitting. Please check your internet or Firebase Rules.");
     });
 }
 
-// 4. Function to Check Status (The Index-Free Fix)
+// 4. Check Status (The Best Index-Free Fix)
 function checkStatus() {
     const searchUHID = document.getElementById('checkUHID').value;
     const resultDisplay = document.getElementById('statusResult');
@@ -62,7 +62,6 @@ function checkStatus() {
 
     resultDisplay.innerText = "Connecting to secure server...";
 
-    // We only query by UHID to avoid needing a Firebase Index
     db.collection("grievances")
       .where("uhid", "==", searchUHID)
       .get()
@@ -71,20 +70,19 @@ function checkStatus() {
               let docs = [];
               querySnapshot.forEach(doc => docs.push(doc.data()));
               
-              // Sort locally by time so the newest one shows first
+              // Local sort to avoid Firebase Index Requirement
               docs.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
               let latestDoc = docs[0];
 
-              // Visual styling based on status
-              let statusColor = "#e67e22"; // Orange for Pending
-              if(latestDoc.status === "Resolved") statusColor = "#27ae60"; // Green
-              if(latestDoc.status === "Under Review") statusColor = "#2980b9"; // Blue
+              let statusColor = "#e67e22"; 
+              if(latestDoc.status === "Resolved") statusColor = "#27ae60";
+              if(latestDoc.status === "Under Review") statusColor = "#2980b9";
 
               resultDisplay.innerHTML = `
                 <div style="margin-top:15px; background: white; padding: 15px; border-radius: 10px; border-left: 6px solid ${statusColor}; border: 1px solid #ddd; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
                     <strong style="display:block; font-size: 16px; color:#333;">Current Status: <span style="color:${statusColor};">${latestDoc.status}</span></strong>
-                    <small style="color:#666;">Dept: ${latestDoc.department} | Cat: ${latestDoc.category}</small><br>
-                    <small style="color:#888;">Updated: ${latestDoc.timestamp ? latestDoc.timestamp.toDate().toLocaleDateString() : 'Syncing...'}</small>
+                    <small style="color:#666;">Dept: ${latestDoc.department}</small><br>
+                    <small style="color:#888;">Updated: ${latestDoc.timestamp ? latestDoc.timestamp.toDate().toLocaleDateString() : 'Just now'}</small>
                 </div>`;
           } else {
               resultDisplay.innerHTML = "<div style='color:#e74c3c; margin-top:15px; font-weight:bold;'>No record found for this UHID.</div>";
@@ -92,11 +90,11 @@ function checkStatus() {
       })
       .catch((error) => {
           console.error("Error:", error);
-          resultDisplay.innerText = "Blocked by browser. Please turn off Shields/AdBlock.";
+          resultDisplay.innerText = "Connection error. Please check Brave Shields or AdBlock.";
       });
 }
 
-// 5. Chatbot Interface Logic
+// 5. Chatbot Logic
 function toggleChat() {
     const chatBox = document.getElementById('chat-box');
     chatBox.style.display = chatBox.style.display === 'none' ? 'flex' : 'none';
@@ -107,22 +105,20 @@ function sendChat() {
     const content = document.getElementById('chat-content');
     if(!input.value) return;
 
-    // Show User Message
-    content.innerHTML += `<p style="margin-bottom:10px;"><strong>You:</strong> ${input.value}</p>`;
+    content.innerHTML += `<p><strong>You:</strong> ${input.value}</p>`;
     
-    // AI Assistant Responses
-    let response = "I'm still learning. For billing or clinical queries, please contact the front desk.";
+    let response = "I'm still learning! For urgent help, please visit the Front Desk.";
     const val = input.value.toLowerCase();
     
-    if(val.includes("timing") || val.includes("opd")) response = "Velmed OPD timings: 09:00 AM to 05:00 PM (Monday to Saturday).";
-    if(val.includes("billing")) response = "The Billing Department is on the Ground Floor, next to the main Pharmacy.";
-    if(val.includes("status") || val.includes("track")) response = "You can track your grievance by entering your UHID in the status box above.";
-    if(val.includes("hello") || val.includes("hi")) response = "Hello! I am your Velmed Assistant. How can I help you today?";
+    if(val.includes("timing") || val.includes("opd")) response = "OPD timings: 9:00 AM to 5:00 PM (Mon-Sat).";
+    if(val.includes("billing")) response = "The Billing desk is on the Ground Floor near the exit.";
+    if(val.includes("status") || val.includes("check")) response = "Use the UHID status box above to track your grievance!";
+    if(val.includes("hi") || val.includes("hello")) response = "Hello! I am the Velmed Assistant. How can I help you?";
 
     setTimeout(() => {
         content.innerHTML += `<p style="color:#00668c; background:#eef; padding:8px; border-radius:8px;"><strong>AI:</strong> ${response}</p>`;
         content.scrollTop = content.scrollHeight;
-    }, 600);
+    }, 500);
 
     input.value = "";
 }
