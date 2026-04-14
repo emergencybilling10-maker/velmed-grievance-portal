@@ -6,23 +6,33 @@
     <title>Management Operations Monitor | Velmed</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Specific styles for the Monitor Dashboard */
-        .admin-container { max-width: 1200px; margin: 20px auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .admin-container { max-width: 1300px; margin: 20px auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th { background: #00668c; color: white; padding: 12px; text-align: left; }
         td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
         .status-badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; }
         .pending { background: #fff3cd; color: #856404; }
-        .resolved { background: #d4edda; color: #155724; }
         .rating-stars { color: #f39c12; font-weight: bold; }
         .refresh-btn { background: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; float: right; }
+        
+        /* Admin Delete Button Styling */
+        .delete-btn { 
+            background: #e74c3c; 
+            color: white; 
+            border: none; 
+            padding: 5px 10px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 12px;
+        }
+        .delete-btn:hover { background: #c0392b; }
     </style>
 </head>
 <body>
     <div class="admin-container">
         <button class="refresh-btn" onclick="loadGrievances()">🔄 Refresh Data</button>
         <h2>Hospital Management Operations Monitor</h2>
-        <p>Real-time Patient Grievance Tracking System</p>
+        <p>Real-time Patient Grievance Tracking System (Admin Access Required for Deletion)</p>
         
         <table>
             <thead>
@@ -32,12 +42,11 @@
                     <th>Dept</th>
                     <th>Category</th>
                     <th>Rating</th>
-                    <th>Grievance Description</th>
+                    <th>Description</th>
                     <th>Status</th>
-                </tr>
+                    <th>Actions</th> </tr>
             </thead>
-            <tbody id="grievanceTable">
-                </tbody>
+            <tbody id="grievanceTable"></tbody>
         </table>
     </div>
 
@@ -45,6 +54,67 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
     <script>
-        // Your Firebase Config (Keep this exactly same as your script.js)
         const firebaseConfig = {
-          apiKey: "AIzaSyDikrV0xVMX6ZGA4_qZWlN_Dr_
+          apiKey: "AIzaSyDikrV0xVMX6ZGA4_qZWlN_Dr_nR_PnWWk",
+          authDomain: "velmed-hospital-feedback.firebaseapp.com",
+          projectId: "velmed-hospital-feedback",
+          storageBucket: "velmed-hospital-feedback.firebasestorage.app",
+          messagingSenderId: "271213008018",
+          appId: "1:271213008018:web:f3e5136d18b8a64a02c24b"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // SET YOUR ADMIN PASSWORD HERE
+        const ADMIN_PASSWORD = "your_secret_password"; 
+
+        function loadGrievances() {
+            const tableBody = document.getElementById('grievanceTable');
+            tableBody.innerHTML = "<tr><td colspan='8'>Loading...</td></tr>";
+
+            db.collection("grievances").orderBy("timestamp", "desc").get().then((querySnapshot) => {
+                tableBody.innerHTML = "";
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const docId = doc.id; // Unique ID from Firebase
+                    const date = data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleString() : "Just now";
+                    
+                    let row = `<tr>
+                        <td>${date}</td>
+                        <td><strong>${data.patientName}</strong><br><small>${data.uhid}</small></td>
+                        <td>${data.department}</td>
+                        <td>${data.category}</td>
+                        <td class="rating-stars">${data.rating} ⭐</td>
+                        <td>${data.description}</td>
+                        <td><span class="status-badge ${data.status.toLowerCase()}">${data.status}</span></td>
+                        <td>
+                            <button class="delete-btn" onclick="deleteEntry('${docId}')">🗑 Delete</button>
+                        </td>
+                    </tr>`;
+                    tableBody.innerHTML += row;
+                });
+            });
+        }
+
+        function deleteEntry(id) {
+            const pass = prompt("Admin Authorization Required: Please enter password to delete this record.");
+            
+            if (pass === ADMIN_PASSWORD) {
+                if (confirm("Are you sure you want to permanently delete this submission?")) {
+                    db.collection("grievances").doc(id).delete().then(() => {
+                        alert("Record deleted successfully.");
+                        loadGrievances(); // Refresh the table
+                    }).catch((error) => {
+                        alert("Error removing record: " + error);
+                    });
+                }
+            } else if (pass !== null) {
+                alert("Incorrect Password. Access Denied.");
+            }
+        }
+
+        loadGrievances();
+    </script>
+</body>
+</html>
