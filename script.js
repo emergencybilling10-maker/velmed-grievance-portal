@@ -1,4 +1,4 @@
-// 1. Firebase Configuration
+// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyDikrV0xVMX6ZGA4_qZWlN_Dr_nR_PnWWk",
   authDomain: "velmed-hospital-feedback.firebaseapp.com",
@@ -8,21 +8,20 @@ const firebaseConfig = {
   appId: "1:271213008018:web:f3e5136d18b8a64a02c24b"
 };
 
-// 2. Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// 3. Submit Grievance Logic
+// SUBMIT GRIEVANCE
 function submitGrievance() {
     const name = document.getElementById('patientName').value;
     const uhid = document.getElementById('uhid').value;
     const dept = document.getElementById('department').value;
     const cat = document.getElementById('category').value;
-    const rating = document.getElementById('rating').value; 
+    const rate = document.getElementById('rating').value;
     const desc = document.getElementById('description').value;
 
-    if (!name || !desc) {
-        alert("Please fill in the Patient Name and Description.");
+    if (!name || !uhid || !desc) {
+        alert("Please provide Name, UHID, and Description.");
         return;
     }
 
@@ -31,94 +30,86 @@ function submitGrievance() {
         uhid: uhid,
         department: dept,
         category: cat,
-        rating: rating,
+        rating: rate,
         description: desc,
         status: "Pending",
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     })
     .then(() => {
-        alert("Grievance submitted successfully to Management.");
-        // Clear fields
-        document.getElementById('patientName').value = "";
-        document.getElementById('uhid').value = "";
-        document.getElementById('description').value = "";
-        document.getElementById('rating').value = "5"; 
+        alert("Success! Management has been notified.");
+        location.reload(); // Refresh to clear form
     })
-    .catch((error) => {
-        console.error("Submission Error:", error);
-        alert("Error submitting. Please check your internet or Firebase Rules.");
-    });
+    .catch((err) => alert("Connection error. Check Brave Shields."));
 }
 
-// 4. Check Status (The Best Index-Free Fix)
+// CHECK STATUS (The powerful index-free fix)
 function checkStatus() {
     const searchUHID = document.getElementById('checkUHID').value;
-    const resultDisplay = document.getElementById('statusResult');
+    const result = document.getElementById('statusResult');
 
-    if (!searchUHID) {
-        alert("Please enter a UHID to search.");
-        return;
-    }
+    if (!searchUHID) return alert("Enter UHID");
 
-    resultDisplay.innerText = "Connecting to secure server...";
+    result.innerHTML = "<p style='color: #666;'>Checking secure records...</p>";
 
+    // We ONLY use .where(). This bypasses the Index Requirement.
     db.collection("grievances")
       .where("uhid", "==", searchUHID)
       .get()
       .then((querySnapshot) => {
-          if (!querySnapshot.empty) {
-              let docs = [];
-              querySnapshot.forEach(doc => docs.push(doc.data()));
-              
-              // Local sort to avoid Firebase Index Requirement
-              docs.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-              let latestDoc = docs[0];
-
-              let statusColor = "#e67e22"; 
-              if(latestDoc.status === "Resolved") statusColor = "#27ae60";
-              if(latestDoc.status === "Under Review") statusColor = "#2980b9";
-
-              resultDisplay.innerHTML = `
-                <div style="margin-top:15px; background: white; padding: 15px; border-radius: 10px; border-left: 6px solid ${statusColor}; border: 1px solid #ddd; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
-                    <strong style="display:block; font-size: 16px; color:#333;">Current Status: <span style="color:${statusColor};">${latestDoc.status}</span></strong>
-                    <small style="color:#666;">Dept: ${latestDoc.department}</small><br>
-                    <small style="color:#888;">Updated: ${latestDoc.timestamp ? latestDoc.timestamp.toDate().toLocaleDateString() : 'Just now'}</small>
-                </div>`;
-          } else {
-              resultDisplay.innerHTML = "<div style='color:#e74c3c; margin-top:15px; font-weight:bold;'>No record found for this UHID.</div>";
+          if (querySnapshot.empty) {
+              result.innerHTML = "<p style='color:red;'>No record found for this UHID.</p>";
+              return;
           }
+
+          let logs = [];
+          querySnapshot.forEach(doc => logs.push(doc.data()));
+
+          // POWERFUL FIX: We sort the time in the browser, not the database.
+          logs.sort((a, b) => {
+              const timeA = a.timestamp ? a.timestamp.seconds : 0;
+              const timeB = b.timestamp ? b.timestamp.seconds : 0;
+              return timeB - timeA;
+          });
+
+          const latest = logs[0];
+          let color = "#e67e22"; // Orange
+          if(latest.status === "Resolved") color = "#27ae60"; // Green
+          if(latest.status === "Under Review") color = "#2980b9"; // Blue
+
+          result.innerHTML = `
+            <div style="margin-top:15px; background: #fff; padding: 12px; border-radius: 8px; border: 1px solid #ddd; border-left: 5px solid ${color};">
+                <strong style="color: ${color}; font-size: 16px;">${latest.status}</strong><br>
+                <small>Department: ${latest.department}</small>
+            </div>`;
       })
-      .catch((error) => {
-          console.error("Error:", error);
-          resultDisplay.innerText = "Connection error. Please check Brave Shields or AdBlock.";
+      .catch(err => {
+          console.log(err);
+          result.innerHTML = "<p style='color:red;'>Service temporary unavailable.</p>";
       });
 }
 
-// 5. Chatbot Logic
+// CHATBOT
 function toggleChat() {
-    const chatBox = document.getElementById('chat-box');
-    chatBox.style.display = chatBox.style.display === 'none' ? 'flex' : 'none';
+    const box = document.getElementById('chat-box');
+    box.style.display = box.style.display === 'none' ? 'flex' : 'none';
 }
 
 function sendChat() {
     const input = document.getElementById('chatInput');
-    const content = document.getElementById('chat-content');
+    const display = document.getElementById('chat-content');
     if(!input.value) return;
 
-    content.innerHTML += `<p><strong>You:</strong> ${input.value}</p>`;
-    
-    let response = "I'm still learning! For urgent help, please visit the Front Desk.";
-    const val = input.value.toLowerCase();
-    
-    if(val.includes("timing") || val.includes("opd")) response = "OPD timings: 9:00 AM to 5:00 PM (Mon-Sat).";
-    if(val.includes("billing")) response = "The Billing desk is on the Ground Floor near the exit.";
-    if(val.includes("status") || val.includes("check")) response = "Use the UHID status box above to track your grievance!";
-    if(val.includes("hi") || val.includes("hello")) response = "Hello! I am the Velmed Assistant. How can I help you?";
+    display.innerHTML += `<p><strong>You:</strong> ${input.value}</p>`;
+    let botMsg = "Please contact our help desk at +91-XXXX-XXXXXX for direct assistance.";
+    const txt = input.value.toLowerCase();
+
+    if(txt.includes("opd") || txt.includes("time")) botMsg = "OPD hours are 9 AM - 5 PM, Mon to Sat.";
+    if(txt.includes("billing")) botMsg = "Billing counters are located on the Ground Floor.";
+    if(txt.includes("status")) botMsg = "Use the 'Track My Grievance' box to see updates.";
 
     setTimeout(() => {
-        content.innerHTML += `<p style="color:#00668c; background:#eef; padding:8px; border-radius:8px;"><strong>AI:</strong> ${response}</p>`;
-        content.scrollTop = content.scrollHeight;
-    }, 500);
-
+        display.innerHTML += `<p style="color:#00668c;"><strong>AI:</strong> ${botMsg}</p>`;
+        display.scrollTop = display.scrollHeight;
+    }, 400);
     input.value = "";
 }
