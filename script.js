@@ -12,7 +12,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// 3. Function to Submit a New Grievance
+// 3. Submit Grievance
 function submitGrievance() {
     const name = document.getElementById('patientName').value;
     const uhid = document.getElementById('uhid').value;
@@ -38,58 +38,83 @@ function submitGrievance() {
     })
     .then(() => {
         alert("Grievance submitted successfully to Management.");
-        // Reset form fields
         document.getElementById('patientName').value = "";
         document.getElementById('uhid').value = "";
         document.getElementById('description').value = "";
         document.getElementById('rating').value = "5"; 
     })
     .catch((error) => {
-        console.error("Error adding document: ", error);
-        alert("Error submitting. Please check your internet connection.");
+        alert("Submission Error. Check internet connection.");
     });
 }
 
-// 4. Function to Check Grievance Status
+// 4. Check Status (The Index-Free Fix)
 function checkStatus() {
     const searchUHID = document.getElementById('checkUHID').value;
     const resultDisplay = document.getElementById('statusResult');
 
     if (!searchUHID) {
-        alert("Please enter a UHID to search.");
+        alert("Please enter a UHID.");
         return;
     }
 
-    resultDisplay.innerText = "Searching database...";
+    resultDisplay.innerText = "Searching...";
 
+    // We removed .orderBy() to prevent the "Index Required" error.
+    // Instead, we get all entries for that UHID and pick the newest one here.
     db.collection("grievances")
       .where("uhid", "==", searchUHID)
-      .orderBy("timestamp", "desc") // Added to ensure you get the most recent one first
-      .limit(1)
       .get()
       .then((querySnapshot) => {
           if (!querySnapshot.empty) {
-              let latestDoc = querySnapshot.docs[0].data();
+              let docs = [];
+              querySnapshot.forEach(doc => docs.push(doc.data()));
               
-              // Define Status UI Colors
-              let statusColor = "#e67e22"; // Default: Orange (Pending)
-              if(latestDoc.status === "Resolved") statusColor = "#27ae60"; // Green
-              if(latestDoc.status === "Under Review") statusColor = "#2980b9"; // Blue
+              // Sort by timestamp manually to get the latest
+              docs.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+              let latestDoc = docs[0];
+
+              let statusColor = "#e67e22"; 
+              if(latestDoc.status === "Resolved") statusColor = "#27ae60";
+              if(latestDoc.status === "Under Review") statusColor = "#2980b9";
 
               resultDisplay.innerHTML = `
-                <div style="margin-top:15px; background: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 5px solid ${statusColor}; font-family: sans-serif;">
-                    <strong style="display:block; margin-bottom:5px;">Current Status: <span style="color:${statusColor};">${latestDoc.status}</span></strong>
-                    <small style="color: #666;">Department: ${latestDoc.department}</small><br>
-                    <small style="color: #666;">Submitted on: ${latestDoc.timestamp ? latestDoc.timestamp.toDate().toLocaleDateString() : 'Just now'}</small>
+                <div style="margin-top:15px; background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #ddd; border-left: 5px solid ${statusColor};">
+                    <strong style="display:block; color:#333;">Status: <span style="color:${statusColor};">${latestDoc.status}</span></strong>
+                    <small>Dept: ${latestDoc.department}</small><br>
+                    <small style="color: #888;">Updated: ${latestDoc.timestamp ? latestDoc.timestamp.toDate().toLocaleDateString() : 'Processing'}</small>
                 </div>`;
           } else {
               resultDisplay.innerHTML = "<div style='color:red; margin-top:15px;'>No record found for this UHID.</div>";
           }
       })
-      .catch((error) => {
-          console.error("Error fetching status:", error);
-          // If sorting by timestamp fails, it's likely because an index is needed. 
-          // Check your browser console for the link to create the required Firebase Index.
-          resultDisplay.innerText = "Error retrieving data. Check console for index requirements.";
+      .catch((err) => {
+          resultDisplay.innerText = "Error connecting to database.";
       });
+}
+
+// 5. Chatbot Logic
+function toggleChat() {
+    const chatBox = document.getElementById('chat-box');
+    chatBox.style.display = chatBox.style.display === 'none' ? 'flex' : 'none';
+}
+
+function sendChat() {
+    const input = document.getElementById('chatInput');
+    const content = document.getElementById('chat-content');
+    if(!input.value) return;
+
+    content.innerHTML += `<p><strong>You:</strong> ${input.value}</p>`;
+    let response = "I'm still learning! For urgent help, please visit the Front Desk.";
+    const val = input.value.toLowerCase();
+    
+    if(val.includes("timing") || val.includes("opd")) response = "OPD timings are 9:00 AM to 5:00 PM, Mon-Sat.";
+    if(val.includes("billing")) response = "Billing is on the Ground Floor near the main exit.";
+    if(val.includes("status")) response = "Enter your UHID in the status box to track your complaint!";
+
+    setTimeout(() => {
+        content.innerHTML += `<p style="color:#00668c;"><strong>AI:</strong> ${response}</p>`;
+        content.scrollTop = content.scrollHeight;
+    }, 500);
+    input.value = "";
 }
