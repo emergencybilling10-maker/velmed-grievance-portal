@@ -1,4 +1,4 @@
-// 1. Firebase Configuration
+// 1. Firebase Configuration (Your specific credentials)
 const firebaseConfig = {
   apiKey: "AIzaSyDikrV0xVMX6ZGA4_qZWlN_Dr_nR_PnWWk",
   authDomain: "velmed-hospital-feedback.firebaseapp.com",
@@ -12,7 +12,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// 3. Submit Grievance
+// 3. Function to Submit a New Grievance
 function submitGrievance() {
     const name = document.getElementById('patientName').value;
     const uhid = document.getElementById('uhid').value;
@@ -33,35 +33,36 @@ function submitGrievance() {
         category: cat,
         rating: rating,
         description: desc,
-        status: "Pending",
+        status: "Pending", // Default status
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     })
     .then(() => {
         alert("Grievance submitted successfully to Management.");
+        // Clear form fields
         document.getElementById('patientName').value = "";
         document.getElementById('uhid').value = "";
         document.getElementById('description').value = "";
         document.getElementById('rating').value = "5"; 
     })
     .catch((error) => {
-        alert("Submission Error. Check internet connection.");
+        console.error("Submission Error:", error);
+        alert("Error submitting. Please check your internet or disable AdBlockers.");
     });
 }
 
-// 4. Check Status (The Index-Free Fix)
+// 4. Function to Check Status (The Index-Free Fix)
 function checkStatus() {
     const searchUHID = document.getElementById('checkUHID').value;
     const resultDisplay = document.getElementById('statusResult');
 
     if (!searchUHID) {
-        alert("Please enter a UHID.");
+        alert("Please enter a UHID to search.");
         return;
     }
 
-    resultDisplay.innerText = "Searching...";
+    resultDisplay.innerText = "Connecting to secure server...";
 
-    // We removed .orderBy() to prevent the "Index Required" error.
-    // Instead, we get all entries for that UHID and pick the newest one here.
+    // We only query by UHID to avoid needing a Firebase Index
     db.collection("grievances")
       .where("uhid", "==", searchUHID)
       .get()
@@ -70,30 +71,32 @@ function checkStatus() {
               let docs = [];
               querySnapshot.forEach(doc => docs.push(doc.data()));
               
-              // Sort by timestamp manually to get the latest
+              // Sort locally by time so the newest one shows first
               docs.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
               let latestDoc = docs[0];
 
-              let statusColor = "#e67e22"; 
-              if(latestDoc.status === "Resolved") statusColor = "#27ae60";
-              if(latestDoc.status === "Under Review") statusColor = "#2980b9";
+              // Visual styling based on status
+              let statusColor = "#e67e22"; // Orange for Pending
+              if(latestDoc.status === "Resolved") statusColor = "#27ae60"; // Green
+              if(latestDoc.status === "Under Review") statusColor = "#2980b9"; // Blue
 
               resultDisplay.innerHTML = `
-                <div style="margin-top:15px; background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #ddd; border-left: 5px solid ${statusColor};">
-                    <strong style="display:block; color:#333;">Status: <span style="color:${statusColor};">${latestDoc.status}</span></strong>
-                    <small>Dept: ${latestDoc.department}</small><br>
-                    <small style="color: #888;">Updated: ${latestDoc.timestamp ? latestDoc.timestamp.toDate().toLocaleDateString() : 'Processing'}</small>
+                <div style="margin-top:15px; background: white; padding: 15px; border-radius: 10px; border-left: 6px solid ${statusColor}; border: 1px solid #ddd; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                    <strong style="display:block; font-size: 16px; color:#333;">Current Status: <span style="color:${statusColor};">${latestDoc.status}</span></strong>
+                    <small style="color:#666;">Dept: ${latestDoc.department} | Cat: ${latestDoc.category}</small><br>
+                    <small style="color:#888;">Updated: ${latestDoc.timestamp ? latestDoc.timestamp.toDate().toLocaleDateString() : 'Syncing...'}</small>
                 </div>`;
           } else {
-              resultDisplay.innerHTML = "<div style='color:red; margin-top:15px;'>No record found for this UHID.</div>";
+              resultDisplay.innerHTML = "<div style='color:#e74c3c; margin-top:15px; font-weight:bold;'>No record found for this UHID.</div>";
           }
       })
-      .catch((err) => {
-          resultDisplay.innerText = "Error connecting to database.";
+      .catch((error) => {
+          console.error("Error:", error);
+          resultDisplay.innerText = "Blocked by browser. Please turn off Shields/AdBlock.";
       });
 }
 
-// 5. Chatbot Logic
+// 5. Chatbot Interface Logic
 function toggleChat() {
     const chatBox = document.getElementById('chat-box');
     chatBox.style.display = chatBox.style.display === 'none' ? 'flex' : 'none';
@@ -104,17 +107,22 @@ function sendChat() {
     const content = document.getElementById('chat-content');
     if(!input.value) return;
 
-    content.innerHTML += `<p><strong>You:</strong> ${input.value}</p>`;
-    let response = "I'm still learning! For urgent help, please visit the Front Desk.";
+    // Show User Message
+    content.innerHTML += `<p style="margin-bottom:10px;"><strong>You:</strong> ${input.value}</p>`;
+    
+    // AI Assistant Responses
+    let response = "I'm still learning. For billing or clinical queries, please contact the front desk.";
     const val = input.value.toLowerCase();
     
-    if(val.includes("timing") || val.includes("opd")) response = "OPD timings are 9:00 AM to 5:00 PM, Mon-Sat.";
-    if(val.includes("billing")) response = "Billing is on the Ground Floor near the main exit.";
-    if(val.includes("status")) response = "Enter your UHID in the status box to track your complaint!";
+    if(val.includes("timing") || val.includes("opd")) response = "Velmed OPD timings: 09:00 AM to 05:00 PM (Monday to Saturday).";
+    if(val.includes("billing")) response = "The Billing Department is on the Ground Floor, next to the main Pharmacy.";
+    if(val.includes("status") || val.includes("track")) response = "You can track your grievance by entering your UHID in the status box above.";
+    if(val.includes("hello") || val.includes("hi")) response = "Hello! I am your Velmed Assistant. How can I help you today?";
 
     setTimeout(() => {
-        content.innerHTML += `<p style="color:#00668c;"><strong>AI:</strong> ${response}</p>`;
+        content.innerHTML += `<p style="color:#00668c; background:#eef; padding:8px; border-radius:8px;"><strong>AI:</strong> ${response}</p>`;
         content.scrollTop = content.scrollHeight;
-    }, 500);
+    }, 600);
+
     input.value = "";
 }
