@@ -3,74 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Velmed Hospitals | Patient Feedback</title>
+    <title>Velmed Hospital | Patient Support</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Modern Minimalist Styling */
+        .thank-you-card { display: none; text-align: center; padding: 40px 20px; animation: fadeIn 0.5s ease; }
+        .star-rating { display: flex; gap: 10px; margin-top: 5px; }
+        .star-rating select { background: #fffcf0; border: 1px solid #f39c12; color: #f39c12; font-weight: bold; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
 </head>
 <body>
-
     <div class="background-overlay"></div>
-
-    <div class="container" id="mainContainer">
-        <div class="form-card" id="formSection">
-            <header class="form-header">
-                <h2 style="color: #00668c; margin-bottom: 5px;">Register Grievance</h2>
-                <p style="color: #666; font-size: 14px;">Your feedback helps us improve Velmed standards.</p>
-            </header>
-
-            <div class="form-body">
-                <div class="input-group">
-                    <label>Patient Name</label>
-                    <input type="text" id="patientName" placeholder="Full Name">
-                </div>
-
-                <div class="input-group">
-                    <label>UHID Number</label>
-                    <input type="text" id="uhid" placeholder="e.g. 123456">
-                </div>
-
-                <div class="input-group">
-                    <label>Department</label>
-                    <select id="department">
-                        <option value="Billing">Billing / Cashier</option>
-                        <option value="Nursing">Nursing / Ward</option>
-                        <option value="Housekeeping">Housekeeping / IPD</option>
-                        <option value="Front Desk">Front Desk / OPD</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
-
-                <div class="input-group">
-                    <label>Facility Rating</label>
-                    <select id="rating" style="color: #f39c12; font-weight: bold;">
-                        <option value="5">⭐⭐⭐⭐⭐ (Excellent)</option>
-                        <option value="4">⭐⭐⭐⭐ (Good)</option>
-                        <option value="3">⭐⭐⭐ (Average)</option>
-                        <option value="2">⭐⭐ (Poor)</option>
-                        <option value="1">⭐ (Very Poor)</option>
-                    </select>
-                </div>
-
-                <div class="input-group">
-                    <label>Contact Details (Phone or Email)</label>
-                    <input type="text" id="contactInfo" placeholder="How should we reach you?">
-                </div>
-
-                <div class="input-group">
-                    <label>Detailed Description</label>
-                    <textarea id="description" rows="4" placeholder="Please describe your concern..."></textarea>
-                </div>
-
-                <button class="submit-btn" id="submitBtn" onclick="submitGrievance()">Submit Grievance</button>
+    <div class="container">
+        <header class="main-header">
+            <div class="logo-section">
+                <h2 style="color: #00668c; letter-spacing: 1px;">VELMED HOSPITALS</h2>
+                <p style="font-size: 11px; color: #666; text-transform: uppercase;">Excellence in Care</p>
             </div>
-        </div>
+            <div class="status-indicator">● Secure Management Portal</div>
+        </header>
 
-        <div class="thank-you-card" id="thankYouSection" style="display: none;">
-            <div class="success-icon">✔</div>
-            <h2>Thank You!</h2>
-            <p>Your grievance has been successfully registered with Velmed Management.</p>
-            <p style="font-size: 14px; color: #888;">Our Bed Management team will review this shortly.</p>
-            <button class="secondary-btn" onclick="location.reload()">New Submission</button>
-        </div>
+        <main class="content-wrapper">
+            <div class="info-side">
+                <span class="badge">Patient Support Desk</span>
+                <h1>Your voice matters to us.</h1>
+                <p>Register your grievance privately. Our management team reviews every submission to improve our facility standards.</p>
+                <div class="features">
+                    <div class="feature-item"><strong>Confidential Review</strong><br>Directly accessible only by HODs.</div>
+                    <div class="feature-item"><strong>Quality Improvement</strong><br>Used for clinical and service audits.</div>
+                </div>
+            </div>
+
+            <div class="form-side">
+                <div id="formContainer">
+                    <h3>Register Grievance</h3>
+                    <p class="sub-text" style="margin-bottom: 20px;">Please provide accurate details for a faster resolution.</p>
+
+                    <div class="input-group">
+                        <label>Patient Name</label>
+                        <input type="text" id="patientName" placeholder="Enter Full Name">
+                    </div>
+
+                    <div class="input-group">
+                        <label>UHID Number</label>
+                        <input type="text" id="uhid" placeholder="UHID-XXXXXX">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Concerned Department</label>
+                        <select id="department">
+                            <option value="Billing">Billing</option>
+                            <option value="Nursing">Nursing</option>
+                            <option value="Doctors">Doctors</option>
+                            <option value="Housekeeping">Housekeeping</option>
+                            <option value="Front Desk/OPD">Front Desk/OPD</option>
+                            <option value="Management">Management</option>
+                            <option value="Services">Services</option>
+                            <option value="Food">Food / Catering</option>
+                            <option value="Security">Security</option>
+                            <option value="Facilities">Facilities/Infrastructure</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Facility Rating</label>
+                        <select id="rating">
+                            <option value="5">⭐⭐⭐⭐⭐ (Excellent)</option>
+                            <option value="4">⭐⭐⭐⭐ (Good)</option>
+                            <option value="3">⭐⭐⭐ (Average)</option>
+                            <option value="2">⭐⭐ (Poor)</option>
+                            <option value="1">⭐ (Very Poor)</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Contact Details (Phone or Email)</label>
+                        <input type="text" id="patientContact" placeholder="To receive your resolution update">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Detailed Description</label>
+                        <textarea id="description" placeholder="Describe the issue in detail..." rows="4"></textarea>
+                    </div>
+
+                    <button id="submitBtn" onclick="submitGrievance()" style="background: #00668c; font-weight: bold;">Submit Grievance</button>
+                </div>
+
+                <div id="successMessage" class="thank-you-card">
+                    <div style="font-size: 50px;">✅</div>
+                    <h2 style="color: #00668c; margin-top: 10px;">Thank You!</h2>
+                    <p style="color: #666; line-height: 1.6;">Your grievance has been successfully registered with Velmed Management. We appreciate your feedback and will look into this matter with high priority.</p>
+                    <button onclick="location.reload()" style="background: transparent; color: #00668c; border: 1px solid #00668c; margin-top: 20px; width: auto; padding: 10px 20px;">File Another Review</button>
+                </div>
+            </div>
+        </main>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
