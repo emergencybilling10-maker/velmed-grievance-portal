@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Velmed Hospital | Grievance Portal</title>
+    <title>Velmed Hospital | Patient Support</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -13,69 +13,80 @@
     <div class="container">
         <header class="main-header">
             <div class="logo-section">
-                <h2 style="color: #00668c; margin:0;">VELMED HOSPITALS</h2>
-                <p style="margin:0; font-size: 12px; color: #666;">Indus | Eden Initiative</p>
+                <h2 style="color: #00668c; margin:0; letter-spacing: 1px;">VELMED HOSPITALS</h2>
+                <p style="margin:0; font-size: 11px; color: #666; font-weight: bold;">MANAGEMENT INTAKE PORTAL</p>
             </div>
-            <div class="status-indicator">● Secure Management Link Active</div>
+            <div class="status-indicator">● Secure Link</div>
         </header>
 
         <main class="content-wrapper">
-            <div class="info-side">
-                <span class="badge">Patient Support Desk</span>
-                <h1>Direct Line to Hospital Management.</h1>
-                <p>Your feedback helps us maintain Velmed's standard of care. Submissions are encrypted and reviewed by HODs.</p>
-                
-                <div class="features">
-                    <div class="feature-item"><strong>● Real-time Monitoring</strong><br>Bed managers see your request instantly.</div>
-                    <div class="feature-item"><strong>● Private Tracking</strong><br>Use your UHID to check resolution progress.</div>
-                </div>
-            </div>
-
-            <div class="form-side">
+            <div class="form-card" id="form-container">
                 <h3>Register Grievance</h3>
-                <div class="input-group">
-                    <label>Patient Name</label>
-                    <input type="text" id="patientName" placeholder="Full Name">
+                <p class="sub-text">Your feedback is sent directly to the Bed Management Office.</p>
+                
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label>Patient Name</label>
+                        <input type="text" id="patientName" placeholder="Enter Full Name">
+                    </div>
+                    <div class="input-group">
+                        <label>UHID</label>
+                        <input type="text" id="uhid" placeholder="UHID-12345">
+                    </div>
                 </div>
-                <div class="input-group">
-                    <label>UHID / Phone</label>
-                    <input type="text" id="uhid" placeholder="UHID-12345">
+
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label>Department</label>
+                        <select id="department">
+                            <option value="Billing">Billing / Cashier</option>
+                            <option value="Nursing">Nursing / Ward</option>
+                            <option value="Housekeeping">Housekeeping</option>
+                            <option value="Front Desk">Front Desk / OPD</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Category</label>
+                        <select id="category">
+                            <option value="Service Delay">Delay in Service</option>
+                            <option value="Behavior">Staff Behavior</option>
+                            <option value="Facility">Facility / Cleanliness</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
                 </div>
+
                 <div class="input-group">
-                    <label>Email for Updates</label>
-                    <input type="email" id="patientEmail" placeholder="Enter email to receive status updates">
-                </div>
-                <div class="input-group">
-                    <label>Department</label>
-                    <select id="department">
-                        <option value="Billing">Billing</option>
-                        <option value="Nursing">Nursing</option>
-                        <option value="Housekeeping">Housekeeping</option>
+                    <label>Facility Rating</label>
+                    <select id="rating">
+                        <option value="5">⭐⭐⭐⭐⭐ (Excellent)</option>
+                        <option value="4">⭐⭐⭐⭐ (Good)</option>
+                        <option value="3">⭐⭐⭐ (Average)</option>
+                        <option value="2">⭐⭐ (Poor)</option>
+                        <option value="1">⭐ (Very Poor)</option>
                     </select>
                 </div>
+
                 <div class="input-group">
                     <label>Description</label>
-                    <textarea id="description" placeholder="Describe your issue..." rows="3"></textarea>
+                    <textarea id="description" placeholder="Please describe the issue..." rows="3"></textarea>
                 </div>
-                <button id="submitBtn" onclick="submitGrievance()">Submit & Register</button>
-            </div>
-            </main>
-    </div>
 
-    <div id="chat-circle" onclick="toggleChat()" style="position: fixed; bottom: 25px; right: 25px; background: #00668c; width: 55px; height: 55px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 1000; font-size: 24px;">💬</div>
-    
-    <div id="chat-box" style="display: none; position: fixed; bottom: 90px; right: 25px; width: 300px; height: 400px; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); flex-direction: column; z-index: 1000; overflow: hidden; border: 1px solid #ddd;">
-        <div style="background: #00668c; color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between;">
-            <span>Velmed Assistant</span>
-            <span onclick="toggleChat()" style="cursor:pointer">×</span>
-        </div>
-        <div id="chat-content" style="flex: 1; padding: 15px; overflow-y: auto; background: #f9f9f9; font-size: 13px;">
-            <p><strong>AI:</strong> Welcome to Velmed Hospitals. How can I assist you today?</p>
-        </div>
-        <div style="padding: 10px; border-top: 1px solid #eee; display: flex;">
-            <input type="text" id="chatInput" placeholder="Ask about OPD, Billing..." style="flex: 1; border: 1px solid #ddd; padding: 8px; border-radius: 5px; outline: none;">
-            <button onclick="sendChat()" style="width: auto; margin: 0 0 0 5px; padding: 5px 10px;">Send</button>
-        </div>
+                <div class="input-group">
+                    <label>Phone Number or Email ID</label>
+                    <input type="text" id="contactInfo" placeholder="Where should we contact you?">
+                </div>
+
+                <button id="submitBtn" onclick="submitGrievance()">Submit Grievance</button>
+            </div>
+
+            <div id="success-message" style="display: none; text-align: center; padding: 40px 20px;">
+                <div style="font-size: 50px; margin-bottom: 20px;">✅</div>
+                <h2 style="color: #00668c;">Thank You!</h2>
+                <p style="color: #666; line-height: 1.6;">Your grievance has been successfully submitted to Velmed Management. We value your feedback and will review it shortly.</p>
+                <button onclick="location.reload()" style="background: #eee; color: #333; margin-top: 20px; width: auto; padding: 10px 30px;">File another report</button>
+            </div>
+        </main>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
