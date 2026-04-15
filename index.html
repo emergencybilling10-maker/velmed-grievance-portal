@@ -1,4 +1,6 @@
-<!DOCTYPE html>
+Gemini update this code means place the new code in old one.
+
+Old code - <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -114,3 +116,38 @@
     <script src="script.js"></script>
 </body>
 </html>
+
+
+
+
+
+New code - <div class="form-side">
+    <h3>Log a Grievance</h3>
+    <div class="input-group">
+        <label>Patient Name</label>
+        <input type="text" id="patientName" placeholder="Full Name">
+    </div>
+    <div class="input-group">
+        <label>UHID / Phone</label>
+        <input type="text" id="uhid" placeholder="UHID or Mobile Number">
+    </div>
+    <div class="input-group">
+        <label>Email Address (For Updates)</label>
+        <input type="email" id="patientEmail" placeholder="emergencybilling10@gmail.com">
+    </div>
+
+    <div class="input-group">
+        <label>Department</label>
+        <select id="department">
+            <option value="Billing">Billing</option>
+            <option value="Nursing">Nursing</option>
+            <option value="Housekeeping">Housekeeping</option>
+        </select>
+    </div>
+    <div class="input-group">
+        <label>Description</label>
+        <textarea id="description" placeholder="Describe the issue..." rows="3"></textarea>
+    </div>
+
+    <button id="submitBtn" onclick="submitGrievance()">Submit Privately</button>
+</div>
