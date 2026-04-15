@@ -122,12 +122,19 @@
             });
         });
 
-        // Delete Function
+        // Delete Function with Admin Password
         function deleteEntry(id) {
-            if (confirm("Are you sure you want to permanently delete this record?")) {
-                db.collection("grievances").doc(id).delete()
-                  .then(() => console.log("Deleted"))
-                  .catch((error) => alert("Error deleting: " + error));
+            const adminPass = "Velmed@2026"; // Change your password here
+            const userPass = prompt("Enter Admin Password to delete this record:");
+
+            if (userPass === adminPass) {
+                if (confirm("Password Verified. Are you sure you want to permanently delete this record?")) {
+                    db.collection("grievances").doc(id).delete()
+                      .then(() => alert("Record deleted successfully."))
+                      .catch((error) => alert("Error deleting: " + error));
+                }
+            } else if (userPass !== null) {
+                alert("Incorrect Password. Access Denied.");
             }
         }
     </script>
