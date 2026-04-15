@@ -1,6 +1,4 @@
-Gemini update this code means place the new code in old one.
-
-Old code - <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -35,64 +33,33 @@ Old code - <!DOCTYPE html>
 
             <div class="form-side">
                 <h3>Register Grievance</h3>
-                
                 <div class="input-group">
                     <label>Patient Name</label>
                     <input type="text" id="patientName" placeholder="Full Name">
                 </div>
                 <div class="input-group">
-                    <label>UHID</label>
-                    <input type="text" id="uhid" placeholder="UHID Number">
+                    <label>UHID / Phone</label>
+                    <input type="text" id="uhid" placeholder="UHID-12345">
                 </div>
-
+                <div class="input-group">
+                    <label>Email for Updates</label>
+                    <input type="email" id="patientEmail" placeholder="Enter email to receive status updates">
+                </div>
                 <div class="input-group">
                     <label>Department</label>
                     <select id="department">
-                        <option value="Billing">Billing / Cashier</option>
-                        <option value="Nursing">Nursing / Ward</option>
-                        <option value="Housekeeping">Housekeeping / IPD</option>
-                        <option value="Front Desk">Front Desk / OPD</option>
+                        <option value="Billing">Billing</option>
+                        <option value="Nursing">Nursing</option>
+                        <option value="Housekeeping">Housekeeping</option>
                     </select>
                 </div>
-
                 <div class="input-group">
-                    <label>Category</label>
-                    <select id="category">
-                        <option value="Delay">Delay in Service</option>
-                        <option value="Behavior">Staff Behavior</option>
-                        <option value="Cleanliness">Cleanliness/Hygiene</option>
-                        <option value="Medical">Clinical Quality</option>
-                    </select>
+                    <label>Description</label>
+                    <textarea id="description" placeholder="Describe your issue..." rows="3"></textarea>
                 </div>
-
-                <div class="input-group">
-                    <label>Facility Rating</label>
-                    <select id="rating">
-                        <option value="5">⭐⭐⭐⭐⭐ (Excellent)</option>
-                        <option value="4">⭐⭐⭐⭐ (Good)</option>
-                        <option value="3">⭐⭐⭐ (Average)</option>
-                        <option value="2">⭐⭐ (Poor)</option>
-                        <option value="1">⭐ (Very Poor)</option>
-                    </select>
-                </div>
-
-                <div class="input-group">
-                    <label>Detail Description</label>
-                    <textarea id="description" placeholder="Describe your concern..." rows="3"></textarea>
-                </div>
-
-                <button id="submitBtn" onclick="submitGrievance()">Submit to Management</button>
-
-                <div class="status-check-card" style="margin-top: 25px; border-top: 2px dashed #eee; padding-top: 20px;">
-                    <h4 style="margin: 0 0 10px 0; color: #00668c;">Track My Grievance</h4>
-                    <div style="display: flex; gap: 8px;">
-                        <input type="text" id="checkUHID" placeholder="Enter UHID">
-                        <button onclick="checkStatus()" style="width: auto; padding: 10px 15px; margin:0; background: #27ae60;">Check</button>
-                    </div>
-                    <div id="statusResult"></div>
-                </div>
+                <button id="submitBtn" onclick="submitGrievance()">Submit & Register</button>
             </div>
-        </main>
+            </main>
     </div>
 
     <div id="chat-circle" onclick="toggleChat()" style="position: fixed; bottom: 25px; right: 25px; background: #00668c; width: 55px; height: 55px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 1000; font-size: 24px;">💬</div>
@@ -116,38 +83,3 @@ Old code - <!DOCTYPE html>
     <script src="script.js"></script>
 </body>
 </html>
-
-
-
-
-
-New code - <div class="form-side">
-    <h3>Log a Grievance</h3>
-    <div class="input-group">
-        <label>Patient Name</label>
-        <input type="text" id="patientName" placeholder="Full Name">
-    </div>
-    <div class="input-group">
-        <label>UHID / Phone</label>
-        <input type="text" id="uhid" placeholder="UHID or Mobile Number">
-    </div>
-    <div class="input-group">
-        <label>Email Address (For Updates)</label>
-        <input type="email" id="patientEmail" placeholder="emergencybilling10@gmail.com">
-    </div>
-
-    <div class="input-group">
-        <label>Department</label>
-        <select id="department">
-            <option value="Billing">Billing</option>
-            <option value="Nursing">Nursing</option>
-            <option value="Housekeeping">Housekeeping</option>
-        </select>
-    </div>
-    <div class="input-group">
-        <label>Description</label>
-        <textarea id="description" placeholder="Describe the issue..." rows="3"></textarea>
-    </div>
-
-    <button id="submitBtn" onclick="submitGrievance()">Submit Privately</button>
-</div>
