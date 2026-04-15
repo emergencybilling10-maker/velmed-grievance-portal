@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Case Resolution | Velmed Management</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .action-container { max-width: 800px; margin: 40px auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .case-header { border-bottom: 2px solid #00668c; padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; background: #f9f9f9; padding: 20px; border-radius: 10px; }
+        .management-area { border-top: 2px solid #eee; pt: 20px; margin-top: 20px; }
+        label { font-weight: bold; color: #00668c; display: block; margin-bottom: 8px; }
+        select, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 20px; font-family: inherit; }
+        .btn-save { background: #27ae60; color: white; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; }
+    </style>
+</head>
+<body>
+
+<div class="action-container">
+    <div class="case-header">
+        <h2 style="margin:0; color:#00668c;">Case Resolution File</h2>
+        <button onclick="window.location.href='monitor.html'" style="background:none; border:1px solid #00668c; color:#00668c; cursor:pointer; padding:5px 15px; border-radius:5px;">← Back to Monitor</button>
+    </div>
+
+    <div id="loader">Loading case details...</div>
+
+    <div id="caseDetails" style="display:none;">
+        <div class="info-grid">
+            <div>
+                <label>Patient Name</label>
+                <div id="disp-name" style="font-size: 18px; font-weight: bold;"></div>
+            </div>
+            <div>
+                <label>UHID</label>
+                <div id="disp-uhid"></div>
+            </div>
+            <div>
+                <label>Department</label>
+                <div id="disp-dept"></div>
+            </div>
+            <div>
+                <label>Contact Info</label>
+                <div id="disp-contact" style="color: blue;"></div>
+            </div>
+        </div>
+
+        <label>Original Grievance</label>
+        <div id="disp-desc" style="background:#fff3cd; padding:15px; border-radius:8px; margin-bottom:25px;"></div>
+
+        <div class="management-area">
+            <label>Update Status</label>
+            <select id="updateStatus">
+                <option value="Pending">Pending</option>
+                <option value="Under Review">Under Review</option>
+                <option value="Resolved">Resolved (Close Case)</option>
+            </select>
+
+            <label>Action Taken / Management Description</label>
+            <textarea id="actionDescription" rows="6" placeholder="Write exactly what action was taken to resolve this issue..."></textarea>
+
+            <button class="btn-save" onclick="saveResolution()">Update & Notify System</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyDikrV0xVMX6ZGA4_qZWlN_Dr_nR_PnWWk",
+        authDomain: "velmed-hospital-feedback.firebaseapp.com",
+        projectId: "velmed-hospital-feedback",
+        storageBucket: "velmed-hospital-feedback.firebasestorage.app",
+        messagingSenderId: "271213008018",
+        appId: "1:271213008018:web:f3e5136d18b8a64a02c24b"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Get ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const docId = urlParams.get('id');
+
+    if (docId) {
+        db.collection("grievances").doc(docId).get().then((doc) => {
+            if (doc.exists) {
+                const data = doc.data();
+                document.getElementById('disp-name').innerText = data.patientName;
+                document.getElementById('disp-uhid').innerText = data.uhid;
+                document.getElementById('disp-dept').innerText = data.department;
+                document.getElementById('disp-contact').innerText = data.patientContact;
+                document.getElementById('disp-desc').innerText = data.description;
+                
+                document.getElementById('updateStatus').value = data.status || "Pending";
+                document.getElementById('actionDescription').value = data.actionTaken || "";
+
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('caseDetails').style.display = 'block';
+            }
+        });
+    }
+
+    function saveResolution() {
+        const status = document.getElementById('updateStatus').value;
+        const note = document.getElementById('actionDescription').value;
+
+        db.collection("grievances").doc(docId).update({
+            status: status,
+            actionTaken: note
+        }).then(() => {
+            alert("Case Updated Successfully!");
+            window.location.href = 'monitor.html';
+        });
+    }
+</script>
+</body>
+</html>
