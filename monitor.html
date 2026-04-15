@@ -3,134 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ops Command Center | Velmed</title>
+    <title>Management Command Center | Velmed</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        .admin-container { max-width: 1300px; margin: 20px auto; background: #f4f7f6; padding: 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        .dashboard-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #00668c; padding-bottom: 15px; margin-bottom: 20px; }
+        body { background: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .admin-wrap { max-width: 1400px; margin: 20px auto; padding: 20px; }
+        .stat-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: center; border-bottom: 4px solid #00668c; }
         
-        /* Filter Buttons */
-        .filter-bar { margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
-        .filter-btn { padding: 8px 16px; border: none; border-radius: 20px; cursor: pointer; background: #ddd; font-weight: bold; transition: 0.3s; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        th { background: #00668c; color: white; padding: 15px; text-align: left; font-weight: 500; }
+        td { padding: 15px; border-bottom: 1px solid #eee; vertical-align: top; }
+        
+        .status-pill { padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
+        .status-Pending { background: #fff3cd; color: #856404; }
+        .status-UnderReview { background: #cfe2ff; color: #084298; }
+        .status-Resolved { background: #d1e7dd; color: #0f5132; }
+
+        .action-box { width: 100%; border: 1px solid #ddd; border-radius: 5px; padding: 8px; margin-bottom: 10px; font-size: 13px; }
+        .update-btn { background: #00668c; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; transition: 0.3s; width: 100%; }
+        .update-btn:hover { background: #004d6a; }
+        
+        .filter-section { margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap; }
+        .filter-btn { padding: 8px 15px; border-radius: 20px; border: 1px solid #00668c; background: white; color: #00668c; cursor: pointer; font-size: 12px; }
         .filter-btn.active { background: #00668c; color: white; }
-
-        /* Table & SLA Styles */
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; }
-        th { background: #00668c; color: white; padding: 15px; text-align: left; }
-        td { padding: 15px; border-bottom: 1px solid #eee; }
-        
-        .sla-tag { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
-        .sla-urgent { background: #ff4d4d; color: white; animation: blink 1.5s infinite; }
-        .sla-normal { background: #27ae60; color: white; }
-
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-        
-        .delete-btn { background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div class="admin-container">
-        <div class="dashboard-header">
-            <div>
-                <h2 style="margin:0; color:#00668c;">Ops Command Center</h2>
-                <p style="margin:0; font-size:14px;">Real-time Management Monitor</p>
-            </div>
-            <div id="live-indicator" style="color:#27ae60; font-weight:bold;">● LIVE CONNECTION</div>
-        </div>
 
-        <div class="filter-bar" id="filterBar">
-            <button class="filter-btn active" onclick="filterDept('All')">All Departments</button>
-            <button class="filter-btn" onclick="filterDept('Billing')">Billing</button>
-            <button class="filter-btn" onclick="filterDept('Nursing')">Nursing</button>
-            <button class="filter-btn" onclick="filterDept('Housekeeping')">Housekeeping</button>
+<div class="admin-wrap">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <div>
+            <h1 style="margin:0; color:#00668c;">Review Management Portal</h1>
+            <p style="margin:0; color:#666;">Hospital Operations & Patient Satisfaction</p>
         </div>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Time / SLA</th>
-                    <th>Patient Details</th>
-                    <th>Dept/Cat</th>
-                    <th>Rating</th>
-                    <th>Description</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="grievanceTable"></tbody>
-        </table>
+        <div id="connection-status" style="color: green; font-weight: bold;">● LIVE SYSTEM</div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <div class="stat-bar">
+        <div class="stat-card"><h3>Total Reviews</h3><div id="total-count" style="font-size: 24px; font-weight: bold;">0</div></div>
+        <div class="stat-card"><h3>Pending</h3><div id="pending-count" style="font-size: 24px; font-weight: bold; color: #856404;">0</div></div>
+        <div class="stat-card"><h3>Resolved</h3><div id="resolved-count" style="font-size: 24px; font-weight: bold; color: #0f5132;">0</div></div>
+    </div>
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDikrV0xVMX6ZGA4_qZWlN_Dr_nR_PnWWk",
-            authDomain: "velmed-hospital-feedback.firebaseapp.com",
-            projectId: "velmed-hospital-feedback",
-            storageBucket: "velmed-hospital-feedback.firebasestorage.app",
-            messagingSenderId: "271213008018",
-            appId: "1:271213008018:web:f3e5136d18b8a64a02c24b"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+    <div class="filter-section" id="deptFilters">
+        <button class="filter-btn active" onclick="setFilter('All')">All Depts</button>
+        </div>
 
-        let currentFilter = 'All';
+    <table>
+        <thead>
+            <tr>
+                <th width="15%">Patient Info</th>
+                <th width="15%">Dept & Rating</th>
+                <th width="35%">Complaint Detail</th>
+                <th width="35%">Management Action</th>
+            </tr>
+        </thead>
+        <tbody id="grievanceTable">
+            </tbody>
+    </table>
+</div>
 
-        // REAL-TIME LISTENER (Snapshots)
-        db.collection("grievances").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
-            renderTable(snapshot);
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+<script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDikrV0xVMX6ZGA4_qZWlN_Dr_nR_PnWWk",
+      authDomain: "velmed-hospital-feedback.firebaseapp.com",
+      projectId: "velmed-hospital-feedback",
+      storageBucket: "velmed-hospital-feedback.firebasestorage.app",
+      messagingSenderId: "271213008018",
+      appId: "1:271213008018:web:f3e5136d18b8a64a02c24b"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let currentFilter = 'All';
+
+    // REAL-TIME LISTENER
+    db.collection("grievances").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
+        renderPortal(snapshot);
+        updateStats(snapshot);
+    });
+
+    function renderPortal(snapshot) {
+        const tableBody = document.getElementById('grievanceTable');
+        tableBody.innerHTML = "";
+
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            const id = doc.id;
+
+            if (currentFilter !== 'All' && data.department !== currentFilter) return;
+
+            tableBody.innerHTML += `
+                <tr>
+                    <td>
+                        <strong>${data.patientName}</strong><br>
+                        <small>UHID: ${data.uhid}</small><br>
+                        <small style="color: blue;">📞 ${data.patientContact}</small>
+                    </td>
+                    <td>
+                        <span style="font-size:12px; color:#666;">${data.department}</span><br>
+                        <span style="color: #f39c12;">${data.rating} ⭐</span>
+                    </td>
+                    <td>
+                        <p style="margin:0; font-size:14px; color:#333;">${data.description}</p>
+                        <small style="color:#999;">${data.timestamp ? data.timestamp.toDate().toLocaleString() : 'Just now'}</small>
+                    </td>
+                    <td>
+                        <select id="status-${id}" class="action-box" onchange="changeSelectColor(this, '${id}')">
+                            <option value="Pending" ${data.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                            <option value="Under Review" ${data.status === 'Under Review' ? 'selected' : ''}>Under Review</option>
+                            <option value="Resolved" ${data.status === 'Resolved' ? 'selected' : ''}>Resolved</option>
+                        </select>
+                        <textarea id="note-${id}" class="action-box" rows="2" placeholder="Describe action taken...">${data.actionTaken || ""}</textarea>
+                        <button class="update-btn" onclick="updateCase('${id}')">Save & Close Case</button>
+                    </td>
+                </tr>
+            `;
         });
+    }
 
-        function renderTable(snapshot) {
-            const tableBody = document.getElementById('grievanceTable');
-            tableBody.innerHTML = "";
+    function updateCase(id) {
+        const newStatus = document.getElementById(`status-${id}`).value;
+        const newNote = document.getElementById(`note-${id}`).value;
 
-            snapshot.forEach((doc) => {
-                const data = doc.data();
-                if (currentFilter !== 'All' && data.department !== currentFilter) return;
+        db.collection("grievances").doc(id).update({
+            status: newStatus,
+            actionTaken: newNote
+        }).then(() => {
+            alert("Record Updated Successfully.");
+        });
+    }
 
-                const docId = doc.id;
-                const timeData = data.timestamp ? data.timestamp.toDate() : new Date();
-                const timeString = timeData.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                
-                // SLA Timer Logic (Check if older than 2 hours)
-                const hoursOld = (new Date() - timeData) / (1000 * 60 * 60);
-                const slaClass = hoursOld > 2 ? 'sla-urgent' : 'sla-normal';
-                const slaText = hoursOld > 2 ? 'OVERDUE' : 'ACTIVE';
+    function updateStats(snapshot) {
+        let total = 0, pending = 0, resolved = 0;
+        snapshot.forEach(doc => {
+            total++;
+            if (doc.data().status === 'Pending') pending++;
+            if (doc.data().status === 'Resolved') resolved++;
+        });
+        document.getElementById('total-count').innerText = total;
+        document.getElementById('pending-count').innerText = pending;
+        document.getElementById('resolved-count').innerText = resolved;
+    }
 
-                tableBody.innerHTML += `
-                    <tr>
-                        <td>
-                            <strong>${timeString}</strong><br>
-                            <span class="sla-tag ${slaClass}">${slaText}</span>
-                        </td>
-                        <td><strong>${data.patientName}</strong><br><small>UHID: ${data.uhid}</small></td>
-                        <td>${data.department}<br><small>${data.category}</small></td>
-                        <td style="color:#f39c12;">${data.rating} ⭐</td>
-                        <td>${data.description}</td>
-                        <td>
-                            <button class="delete-btn" onclick="deleteEntry('${docId}')">🗑</button>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
-
-        function filterDept(dept) {
-            currentFilter = dept;
-            // Visual update for buttons
-            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            // Trigger refresh
-            db.collection("grievances").orderBy("timestamp", "desc").get().then(renderTable);
-        }
-
-        function deleteEntry(id) {
-            if (confirm("Permanently delete this record?")) {
-                db.collection("grievances").doc(id).delete();
-            }
-        }
-    </script>
+    function setFilter(dept) {
+        currentFilter = dept;
+        db.collection("grievances").orderBy("timestamp", "desc").get().then(renderPortal);
+    }
+</script>
 </body>
 </html>
