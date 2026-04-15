@@ -1,4 +1,4 @@
-// Firebase Configuration
+// 1. Firebase Configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDikrV0xVMX6ZGA4_qZWlN_Dr_nR_PnWWk",
   authDomain: "velmed-hospital-feedback.firebaseapp.com",
@@ -8,52 +8,50 @@ const firebaseConfig = {
   appId: "1:271213008018:web:f3e5136d18b8a64a02c24b"
 };
 
-// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+// 2. Simple Submission Logic
 function submitGrievance() {
-    // Get Elements
+    // Collect Data
     const name = document.getElementById('patientName').value;
     const uhid = document.getElementById('uhid').value;
     const dept = document.getElementById('department').value;
-    const cat = document.getElementById('category').value;
-    const rating = document.getElementById('rating').value; 
+    const rate = document.getElementById('rating').value;
+    const contact = document.getElementById('patientContact').value;
     const desc = document.getElementById('description').value;
-    const contact = document.getElementById('contactInfo').value;
 
-    // Basic Validation
+    // Validate
     if (!name || !uhid || !desc || !contact) {
-        alert("Please fill all the fields so we can assist you better.");
+        alert("Please complete all fields so we can assist you better.");
         return;
     }
 
-    // Change button state
-    const btn = document.getElementById('submitBtn');
-    btn.innerText = "Submitting...";
-    btn.disabled = true;
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.innerText = "Processing...";
+    submitBtn.disabled = true;
 
-    // Save to Firestore
+    // Send to Firebase
     db.collection("grievances").add({
         patientName: name,
         uhid: uhid,
         department: dept,
-        category: cat,
-        rating: rating,
+        rating: rate,
+        patientContact: contact,
         description: desc,
-        contactInfo: contact,
-        status: "Pending", // For your internal portal
+        status: "Pending", // Default status for your Management Portal
+        actionTaken: "",   // Empty for now, you will fill this in the Portal
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     })
     .then(() => {
-        // Switch views: Hide form, Show success
-        document.getElementById('form-container').style.display = 'none';
-        document.getElementById('success-message').style.display = 'block';
+        // Smooth UI Transition
+        document.getElementById('formContainer').style.display = 'none';
+        document.getElementById('successMessage').style.display = 'block';
     })
     .catch((error) => {
         console.error("Error:", error);
         alert("Submission failed. Please check your internet connection.");
-        btn.innerText = "Submit Grievance";
-        btn.disabled = false;
+        submitBtn.innerText = "Submit Grievance";
+        submitBtn.disabled = false;
     });
 }
